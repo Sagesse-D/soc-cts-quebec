@@ -1,0 +1,31 @@
+name: CI - Build and Push to ACR
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: az acr login --name cr460acr
+
+      - name: Build Docker image
+        run: |
+          docker build -t cr460acr.azurecr.io/cts-webapp:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push cr460acr.azurecr.io/cts-webapp:latest
